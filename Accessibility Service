@@ -1,0 +1,73 @@
+package com.vivek.bhaiassistant
+
+import android.accessibilityservice.AccessibilityService
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
+
+class BhaiAccessibilityService :
+    AccessibilityService() {
+
+    override fun onAccessibilityEvent(
+        event: AccessibilityEvent?
+    ) {
+        // Future UI automation
+    }
+
+    override fun onInterrupt() {}
+
+    fun clickText(
+        text: String
+    ): Boolean {
+
+        val root =
+            rootInActiveWindow
+                ?: return false
+
+        return clickRecursive(
+            root,
+            text
+        )
+    }
+
+    private fun clickRecursive(
+        node: AccessibilityNodeInfo,
+        target: String
+    ): Boolean {
+
+        val nodeText =
+            node.text?.toString() ?: ""
+
+        if (
+            nodeText.equals(
+                target,
+                ignoreCase = true
+            ) &&
+            node.isClickable
+        ) {
+
+            return node.performAction(
+                AccessibilityNodeInfo.ACTION_CLICK
+            )
+        }
+
+        for (
+            i in 0 until node.childCount
+        ) {
+
+            val child =
+                node.getChild(i)
+                    ?: continue
+
+            if (
+                clickRecursive(
+                    child,
+                    target
+                )
+            ) {
+                return true
+            }
+        }
+
+        return false
+    }
+}
